@@ -256,7 +256,6 @@ library Pool {
 
         SwapCache memory cache = SwapCache({
             liquidityStart: self.liquidity,
-            /// @dev 8 bits for protocol swap fee instead of 4 bits in v3
             protocolFee: params.zeroForOne ? uint8(slot0Start.protocolFee % 256) : uint8(slot0Start.protocolFee >> 8)
         });
 
@@ -499,16 +498,6 @@ library Pool {
         if (self.isNotInitialized()) revert PoolNotInitialized();
         self.slot0.protocolFee = protocolFee;
     }
-
-    // /// @notice Sets the swap fee for the pool.
-    // /// @dev This function is internal and should only be called from within the contract.
-    // /// @param self Reference to the storage state.
-    // /// @param swapFee The new swap fee to be set.
-    // /// @dev Reverts if the pool is not initialized.
-    // function setSwapFee(State storage self, uint24 swapFee) internal {
-    //     if (self.isNotInitialized()) revert PoolNotInitialized();
-    //     self.slot0.swapFee = swapFee;
-    // }
 
     /// @notice Checks if the pool is not initialized.
     /// @dev This function is internal and should only be called from within the contract.

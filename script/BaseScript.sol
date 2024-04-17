@@ -7,12 +7,12 @@ abstract contract BaseScript is Script {
     string path;
 
     function setUp() public virtual {
-        string memory scriptConfig = vm.envString("SCRIPT_CONFIG");
-        console.log("[BaseScript] SCRIPT_CONFIG: ", scriptConfig);
+        // string memory scriptConfig = vm.envString("SCRIPT_CONFIG");
+        // console.log("[BaseScript] SCRIPT_CONFIG: ", scriptConfig);
 
-        string memory root = vm.projectRoot();
-        path = string.concat(root, "/script/config/", scriptConfig, ".json");
-        console.log("[BaseScript] Reading config from: ", path);
+        // string memory root = vm.projectRoot();
+        // path = string.concat(root, "/script/config/", scriptConfig, ".json");
+        // console.log("[BaseScript] Reading config from: ", path);
     }
 
     // reference: https://github.com/foundry-rs/foundry/blob/master/testdata/default/cheats/Json.t.sol

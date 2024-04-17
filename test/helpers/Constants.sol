@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-/// @title Constants library
-/// @notice Provides immutable constants used for various calculations and operations within the tests.
 library Constants {
     uint160 public constant SQRT_RATIO_1_1 = 79228162514264337593543950336;
     uint160 public constant SQRT_RATIO_1_2 = 56022770974786139918731938227;

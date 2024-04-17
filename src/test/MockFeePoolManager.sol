@@ -6,7 +6,6 @@ import {PoolId, PoolIdLibrary} from "../types/PoolId.sol";
 import {PoolKey} from "../types/PoolKey.sol";
 import {BalanceDelta} from "../types/BalanceDelta.sol";
 import {Fees} from "../Fees.sol";
-import {FeeLibrary} from "../libraries/FeeLibrary.sol";
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 /**
@@ -14,7 +13,6 @@ import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
  */
 contract MockFeePoolManager is Fees {
     using PoolIdLibrary for PoolKey;
-    using FeeLibrary for uint24;
     using FixedPointMathLib for uint256;
 
     mapping(PoolId poolId => BalanceDelta delta) public balanceDeltaOfPool;
@@ -59,7 +57,6 @@ contract MockFeePoolManager is Fees {
         PoolId id = key.toId();
         Slot0 memory slot0 = pools[id];
 
-        // Similar to uni-v4 logic (deduct protocolFee portion first)
         uint16 protocolFee = isSwap ? slot0.protocolFee : 0;
 
         if (protocolFee > 0) {

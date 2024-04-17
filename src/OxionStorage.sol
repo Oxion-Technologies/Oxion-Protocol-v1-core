@@ -21,7 +21,7 @@ contract OxionStorage is IOxionStorage, OxionToken, Ownable {
 
     mapping(address => bool) public override isPoolManagerRegistered;
 
-    /// @dev keep track of the reserves of the whole vault
+    /// @dev keep track of the reserves of the whole oxion Storage
     mapping(Currency currency => uint256) public override reservesOfStorage;
 
     /// @dev keep track of each pool manager's reserves

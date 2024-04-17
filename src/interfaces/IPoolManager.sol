@@ -154,6 +154,6 @@ interface IPoolManager is IFees, IExtsload {
         returns (BalanceDelta);
 
     /// @notice Sets the protocol's swap fee for the given pool
-    /// Protocol fee is always a portion of swap fee that is owed. If that underlying fee is 0, no protocol fee will accrue even if it is set to > 0.
+    /// Protocol fee is always a portion of swap fee that is owed
     function setProtocolFee(PoolKey memory key) external;
 }

@@ -5,8 +5,6 @@ import {Currency} from "../types/Currency.sol";
 import {IProtocolFeeController} from "./IProtocolFeeController.sol";
 
 interface IFees {
-    /// @notice Thrown when the protocol fee denominator is less than 4. Also thrown when the static or dynamic fee on a pool exceeds the upper limit.
-    error FeeTooLarge();
     /// @notice Thrown when not enough gas is provided to look up the protocol fee
     error ProtocolFeeCannotBeFetched();
     /// @notice Thrown when user not authorized to collect protocol fee

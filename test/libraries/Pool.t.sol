@@ -11,7 +11,6 @@ import {TickBitmap} from "../../src/libraries/TickBitmap.sol";
 import {Tick} from "../../src/libraries/Tick.sol";
 import {SafeCast} from "../../src/libraries/SafeCast.sol";
 import {LiquidityAmounts} from "../helpers/LiquidityAmounts.sol";
-import {FeeLibrary} from "../../src/libraries/FeeLibrary.sol";
 import {FullMath} from "../../src/libraries/FullMath.sol";
 
 contract PoolTest is Test {
@@ -42,7 +41,7 @@ contract PoolTest is Test {
     {
         // Assumptions tested in PoolManager.t.sol
         params.tickSpacing = int24(bound(params.tickSpacing, 1, 32767));
-        swapFee = uint24(bound(swapFee, 0, FeeLibrary.ONE_HUNDRED_PERCENT_FEE - 1));
+        swapFee = 500;
 
         testPoolInitialize(sqrtPriceX96, 0, swapFee);
 

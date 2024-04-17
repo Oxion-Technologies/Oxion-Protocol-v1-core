@@ -6,7 +6,7 @@ import {BaseScript} from "./BaseScript.sol";
 import {OxionStorage} from "../src/OxionStorage.sol";
 
 /**
- * forge script script/01_DeployVault.s.sol:DeployVaultScript -vvv \
+ * forge script script/01_DeployOxionStorage.s.sol:DeployOxionStorageScript -vvv \
  *     --rpc-url $RPC_URL \
  *     --broadcast \
  *     --slow \

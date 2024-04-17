@@ -9,9 +9,6 @@ import {Pool} from "./libraries/Pool.sol";
 import {Position} from "./libraries/Position.sol";
 import {PoolKey} from "./types/PoolKey.sol";
 import {IPoolManager} from "./interfaces/IPoolManager.sol";
-import {IDynamicFeeManager} from "./interfaces/IDynamicFeeManager.sol";
-import {PoolParametersHelper} from "./libraries/PoolParametersHelper.sol";
-import {FeeLibrary} from "./libraries/FeeLibrary.sol";
 import {PoolId, PoolIdLibrary} from "./types/PoolId.sol";
 import {BalanceDelta, BalanceDeltaLibrary} from "./types/BalanceDelta.sol";
 import {Extsload} from "./Extsload.sol";
@@ -20,8 +17,6 @@ import {SafeCast} from "./libraries/SafeCast.sol";
 contract PoolManager is IPoolManager, Fees, Extsload {
     using SafeCast for int256;
     using PoolIdLibrary for PoolKey;
-    using FeeLibrary for uint24;
-    using PoolParametersHelper for bytes32;
     using Pool for *;
     using Position for mapping(bytes32 => Position.Info);
 
@@ -100,7 +95,6 @@ contract PoolManager is IPoolManager, Fees, Extsload {
         uint24 swapFee = key.fee;
         tick = pools[id].initialize(sqrtPriceX96, protocolFee, swapFee);
 
-        /// @notice Make sure the first event is noted, so that later events from afterHook won't get mixed up with this one
         emit Initialize(id, key.currency0, key.currency1, key.fee, tickSpacing);
     }
 
@@ -118,14 +112,12 @@ contract PoolManager is IPoolManager, Fees, Extsload {
                 tickLower: params.tickLower,
                 tickUpper: params.tickUpper,
                 liquidityDelta: params.liquidityDelta.toInt128(),
-                ///////////////////////////////////////////////////
                 tickSpacing: feeAmountTickSpacing[key.fee]
             })
         );
 
         oxionStorage.accountPoolBalanceDelta(key, delta, msg.sender);
 
-        /// @notice Make sure the first event is noted, so that later events from afterHook won't get mixed up with this one
         emit ModifyLiquidity(id, msg.sender, params.tickLower, params.tickUpper, params.liquidityDelta);
     }
 
@@ -142,7 +134,6 @@ contract PoolManager is IPoolManager, Fees, Extsload {
         Pool.SwapState memory state;
         (delta, state) = pools[id].swap(
             Pool.SwapParams({
-                ////////////////////////////////////////////////////////
                 tickSpacing: feeAmountTickSpacing[key.fee],
                 zeroForOne: params.zeroForOne,
                 amountSpecified: params.amountSpecified,
@@ -160,7 +151,6 @@ contract PoolManager is IPoolManager, Fees, Extsload {
             }
         }
 
-        /// @notice Make sure the first event is noted, so that later events from afterHook won't get mixed up with this one
         emit Swap(
             id,
             msg.sender,
@@ -188,7 +178,6 @@ contract PoolManager is IPoolManager, Fees, Extsload {
         (delta, tick) = pools[id].donate(amount0, amount1);
         oxionStorage.accountPoolBalanceDelta(key, delta, msg.sender);
 
-        /// @notice Make sure the first event is noted, so that later events from afterHook won't get mixed up with this one
         emit Donate(id, msg.sender, amount0, amount1, tick);
     }
 
@@ -198,7 +187,7 @@ contract PoolManager is IPoolManager, Fees, Extsload {
         if (!success) revert ProtocolFeeControllerCallFailedOrInvalidResult();
         PoolId id = key.toId();
         pools[id].setProtocolFee(newProtocolFee);
-        emit ProtocolFeeUpdated(id, newProtocolFee);
+        emit ProtocolFeeUpdated(id, newProtocolFee);     
     }
 
     function _checkPoolInitialized(PoolId id) internal view {

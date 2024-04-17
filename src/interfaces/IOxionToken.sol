@@ -22,7 +22,7 @@ interface IOxionToken {
                                  FUNCTIONS
     //////////////////////////////////////////////////////////////*/
     
-    /// @notice get the amount of user's surplus token in vault
+    /// @notice get the amount of user's surplus token in oxion Storage
     function balanceOf(address user, Currency currency) external view returns (uint256);
 
     /// @notice get the amount that user has authorized for spender to use

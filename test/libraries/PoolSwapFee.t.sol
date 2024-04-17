@@ -5,11 +5,9 @@ import "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {TokenFixture} from "../helpers/TokenFixture.sol";
 import {PoolKey} from "../../src/types/PoolKey.sol";
-import {FeeLibrary} from "../../src/libraries/FeeLibrary.sol";
 import {Deployers} from "../helpers/Deployers.sol";
 import {OxionStorage} from "../../src/OxionStorage.sol";
 import {PoolManager} from "../../src/PoolManager.sol";
-import {PoolParametersHelper} from "../../src/libraries/PoolParametersHelper.sol";
 import {IFees} from "../../src/interfaces/IFees.sol";
 import {IPoolManager} from "../../src/interfaces/IPoolManager.sol";
 import {PoolManagerRouter} from "../helpers/PoolManagerRouter.sol";
@@ -49,8 +47,7 @@ contract PoolSwapFeeTest is Deployers, TokenFixture, Test {
             currency0: currency0,
             currency1: currency1,
             poolManager: poolManager,
-            // 50%
-            fee: FeeLibrary.ONE_HUNDRED_PERCENT_FEE / 2
+            fee: 500
         });
     }
 

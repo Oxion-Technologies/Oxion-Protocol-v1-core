@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
-import {Encoded} from "../../../src/libraries/math/Encoded.sol";
+import {Encoded} from "../../../src/libraries/Encoded.sol";
 
 contract EncodedTest is Test {
     using Encoded for bytes32;

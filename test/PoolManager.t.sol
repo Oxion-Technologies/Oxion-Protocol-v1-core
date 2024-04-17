@@ -19,8 +19,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Position} from "../src/libraries/Position.sol";
 import {Deployers} from "./helpers/Deployers.sol";
 import {TokenFixture, MockERC20} from "./helpers/TokenFixture.sol";
-import {FeeLibrary} from "../src/libraries/FeeLibrary.sol";
-import {PoolParametersHelper} from "../src/libraries/PoolParametersHelper.sol";
 import {BalanceDelta, BalanceDeltaLibrary} from "../src/types/BalanceDelta.sol";
 import {NonStandardERC20} from "./helpers/NonStandardERC20.sol";
 import {ProtocolFeeControllerTest} from "./helpers/ProtocolFeeControllerTest.sol";
@@ -30,8 +28,6 @@ import {FullMath} from "../src/libraries/FullMath.sol";
 contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
     using PoolIdLibrary for PoolKey;
     using CurrencyLibrary for Currency;
-    using PoolParametersHelper for bytes32;
-    using FeeLibrary for uint24;
 
     event Initialize(
         PoolId indexed id,
@@ -179,29 +175,12 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
             key.fee,
             60
         );
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         poolManager.initialize(key, sqrtPriceX96);
 
         (Pool.Slot0 memory slot0,,,) = poolManager.pools(key.toId());
         assertEq(slot0.sqrtPriceX96, sqrtPriceX96);
         assertEq(slot0.protocolFee, 0);
         assertEq(slot0.tick, TickMath.getTickAtSqrtRatio(sqrtPriceX96));
-    }
-
-    function test_initialize_succeedsWithHooks(uint160 sqrtPriceX96) public {
-        // Assumptions tested in Pool.t.sol
-        sqrtPriceX96 = uint160(bound(sqrtPriceX96, TickMath.MIN_SQRT_RATIO, TickMath.MAX_SQRT_RATIO - 1));
-
-        PoolKey memory key = PoolKey({
-            currency0: currency0,
-            currency1: currency1,
-            fee: 3000,
-            poolManager: poolManager
-        });
-
-        poolManager.initialize(key, sqrtPriceX96);
-        (Pool.Slot0 memory slot0,,,) = poolManager.pools(key.toId());
-        assertEq(slot0.sqrtPriceX96, sqrtPriceX96);
     }
 
     function test_initialize_succeedsWithMaxTickSpacing(uint160 sqrtPriceX96) public {
@@ -215,7 +194,6 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
             poolManager: poolManager
         });
 
-
         vm.expectEmit(true, true, true, true);
         emit Initialize(
             key.toId(),
@@ -224,7 +202,6 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
             key.fee,
             60
         );
-
         poolManager.initialize(key, sqrtPriceX96);
     }
 
@@ -283,19 +260,7 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
         poolManager.initialize(key, sqrtPriceX96);
     }
 
-    function test_initialize_failsWithIncorrectSelectors() public {
-    
-        PoolKey memory key = PoolKey({
-            currency0: currency0,
-            currency1: currency1,
-            fee: 100,
-            poolManager: poolManager
-        });
-
-        poolManager.initialize(key, SQRT_RATIO_1_1);
-    } 
-
-    function test_initialize_succeedsWithCorrectSelectors() public {
+    function test_initialize_tickSpacing_1() public {
         PoolKey memory key = PoolKey({
             currency0: currency0,
             currency1: currency1,
@@ -315,22 +280,27 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
         poolManager.initialize(key, SQRT_RATIO_1_1);
     }
 
-    function test_initialize_failsIfTickSpaceTooLarge(uint160 sqrtPriceX96) public {
-        // Assumptions tested in Pool.t.sol
-        sqrtPriceX96 = uint160(bound(sqrtPriceX96, TickMath.MIN_SQRT_RATIO, TickMath.MAX_SQRT_RATIO - 1));
-
+    function test_initialize_tickSpacing_10() public {
         PoolKey memory key = PoolKey({
             currency0: currency0,
             currency1: currency1,
-            fee: 3000,
+            fee: 500,
             poolManager: poolManager
         });
 
+        vm.expectEmit(true, true, true, true);
+        emit Initialize(
+            key.toId(),
+            key.currency0,
+            key.currency1,
+            key.fee,
+            10
+        );
 
-        poolManager.initialize(key, sqrtPriceX96);
+        poolManager.initialize(key, SQRT_RATIO_1_1);
     }
 
-    function test_initialize_failsNoOpMissingBeforeCall() public {
+    function test_initialize_tickSpacing_60() public {
         PoolKey memory key = PoolKey({
             currency0: currency0,
             currency1: currency1,
@@ -338,7 +308,16 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
             poolManager: poolManager
         });
 
-        poolManager.initialize(key, TickMath.MIN_SQRT_RATIO);
+        vm.expectEmit(true, true, true, true);
+        emit Initialize(
+            key.toId(),
+            key.currency0,
+            key.currency1,
+            key.fee,
+            60
+        );
+
+        poolManager.initialize(key, SQRT_RATIO_1_1);
     }
 
     // **************                  *************** //
@@ -357,7 +336,7 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
             currency0: currency0,
             currency1: currency1,
             poolManager: poolManager,
-            fee: uint24(100)
+            fee: 100
         });
 
         // price = 100 tick roughly 46054
@@ -453,7 +432,7 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
             currency0: currency0,
             currency1: currency1,
             poolManager: poolManager,
-            fee: uint24(100)
+            fee: 100
         });
 
         // price = 100 tick roughly 46054
@@ -495,7 +474,7 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
             currency0: currency0,
             currency1: currency1,
             poolManager: poolManager,
-            fee: uint24(500)
+            fee: 500
         });
 
         // price = 100 tick roughly 46054
@@ -537,7 +516,7 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
             currency0: currency0,
             currency1: currency1,
             poolManager: poolManager,
-            fee: uint24(3000)
+            fee: 3000
         });
 
         // price = 100 tick roughly 46054
@@ -564,7 +543,7 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
             currency0: currency0,
             currency1: currency1,
             poolManager: poolManager,
-            fee: uint24(3000)
+            fee: 3000
         });
 
         // price = 100 tick roughly 46054
@@ -642,7 +621,7 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
             currency0: currency0,
             currency1: currency1,
             poolManager: poolManager,
-            fee: uint24(500)
+            fee: 500
         });
 
         // price = 100 tick roughly 46054
@@ -773,53 +752,6 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
         );
     }
 
-    function testModifyPosition_succeedsWithHooksIfInitialized(uint160 sqrtPriceX96) public {
-        sqrtPriceX96 = uint160(bound(sqrtPriceX96, TickMath.MIN_SQRT_RATIO, TickMath.MAX_SQRT_RATIO - 1));
-
-        PoolKey memory key = PoolKey({
-            currency0: currency0,
-            currency1: currency1,
-            fee: 3000,
-            poolManager: poolManager
-        });
-
-        IPoolManager.ModifyLiquidityParams memory params =
-            IPoolManager.ModifyLiquidityParams({tickLower: 0, tickUpper: 60, liquidityDelta: 100});
-
-        poolManager.initialize(key, sqrtPriceX96);
-
-        BalanceDelta balanceDelta;
-        // create a new context to swallow up the revert
-        try PoolManagerTest(payable(this)).tryExecute(
-            address(router),
-            abi.encodeWithSelector(PoolManagerRouter.modifyPosition.selector, key, params)
-        ) {
-            revert("must revert");
-        } catch (bytes memory result) {
-            balanceDelta = abi.decode(result, (BalanceDelta));
-        }
-        router.modifyPosition(key, params);
-    }
-
-    function testModifyPosition_succeedsWithCorrectSelectors() public {
-        PoolKey memory key = PoolKey({
-            currency0: currency0,
-            currency1: currency1,
-            fee: 100,
-            poolManager: poolManager
-        });
-
-        IPoolManager.ModifyLiquidityParams memory params =
-            IPoolManager.ModifyLiquidityParams({tickLower: 0, tickUpper: 60, liquidityDelta: 100});
-
-        poolManager.initialize(key, SQRT_RATIO_1_1);
-
-        vm.expectEmit(true, true, true, true);
-        emit ModifyLiquidity(key.toId(), address(router), 0, 60, 100);
-
-        router.modifyPosition(key, params);
-    }
-
     function testModifyPosition_withNative_gas() public {
         PoolKey memory key = PoolKey({
             currency0: Currency.wrap(address(0)),
@@ -853,7 +785,7 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
             currency0: currency0,
             currency1: currency1,
             poolManager: poolManager,
-            fee: uint24(100)
+            fee: 100
         });
 
         // price = 100 tick roughly 46054
@@ -964,43 +896,6 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
         router.swap(key, params, testSettings);
     }
 
-    function testSwap_crossLmTickCalled() public {
-        PoolKey memory key = PoolKey({
-            currency0: currency0,
-            currency1: currency1,
-            fee: 3000,
-            poolManager: poolManager
-        });
-
-        poolManager.initialize(key, SQRT_RATIO_1_1);
-        IPoolManager.ModifyLiquidityParams memory modifyPositionParams =
-            IPoolManager.ModifyLiquidityParams({tickLower: -60, tickUpper: 60, liquidityDelta: 1 ether});
-
-        router.modifyPosition(key, modifyPositionParams);
-
-        // vm.expectEmit(true, true, true, true);
-        // emit Swap(
-        //     key.toId(),
-        //     address(router),
-        //     3013394245478362,
-        //     -2995354955910780,
-        //     56022770974786139918731938227,
-        //     0,
-        //     -6932,
-        //     3000,
-        //     0
-        // );
-
-        // sell base token(x) for quote token(y), pricea(y / x) decreases
-        IPoolManager.SwapParams memory params =
-            IPoolManager.SwapParams({zeroForOne: true, amountSpecified: 0.1 ether, sqrtPriceLimitX96: SQRT_RATIO_1_2});
-
-        PoolManagerRouter.SwapTestSettings memory testSettings =
-            PoolManagerRouter.SwapTestSettings({withdrawTokens: true, settleUsingTransfer: true});
-
-        router.swap(key, params, testSettings);
-    }
-
     function testSwap_succeedsWithNativeTokensIfInitialized() public {
         PoolKey memory key = PoolKey({
             currency0: Currency.wrap(address(0)),
@@ -1023,62 +918,8 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
         router.swap(key, params, testSettings);
     }
 
-    function testSwap_succeedsWithHooksIfInitialized() public {
-        PoolKey memory key = PoolKey({
-            currency0: currency0,
-            currency1: currency1,
-            fee: 3000,
-            poolManager: poolManager
-        });
 
-        IPoolManager.SwapParams memory params =
-            IPoolManager.SwapParams({zeroForOne: true, amountSpecified: 100, sqrtPriceLimitX96: SQRT_RATIO_1_2});
-
-        PoolManagerRouter.SwapTestSettings memory testSettings =
-            PoolManagerRouter.SwapTestSettings({withdrawTokens: false, settleUsingTransfer: false});
-
-        poolManager.initialize(key, SQRT_RATIO_1_1);
-
-        BalanceDelta balanceDelta;
-        // create a new context to swallow up the revert
-        try PoolManagerTest(payable(this)).tryExecute(
-            address(router),
-            abi.encodeWithSelector(PoolManagerRouter.swap.selector, key, params, testSettings)
-        ) {
-            revert("must revert");
-        } catch (bytes memory result) {
-            balanceDelta = abi.decode(result, (BalanceDelta));
-        }
-        router.swap(key, params, testSettings);
-    }
-
-    function testSwap_succeedsWithCorrectSelectors() public {
-        PoolKey memory key = PoolKey({
-            currency0: currency0,
-            currency1: currency1,
-            fee: 100,
-            poolManager: poolManager
-        });
-
-        IPoolManager.ModifyLiquidityParams memory params =
-            IPoolManager.ModifyLiquidityParams({tickLower: 0, tickUpper: 60, liquidityDelta: 100});
-
-        IPoolManager.SwapParams memory swapParams =
-            IPoolManager.SwapParams({zeroForOne: true, amountSpecified: 10, sqrtPriceLimitX96: SQRT_RATIO_1_2});
-
-        PoolManagerRouter.SwapTestSettings memory testSettings =
-            PoolManagerRouter.SwapTestSettings({withdrawTokens: false, settleUsingTransfer: false});
-
-        poolManager.initialize(key, SQRT_RATIO_1_1);
-        router.modifyPosition(key, params);
-
-        vm.expectEmit(true, true, true, true);
-        emit Swap(key.toId(), address(router), 0, 0, SQRT_RATIO_1_2, 0, -6932, 100, 0);
-
-        router.swap(key, swapParams, testSettings);
-    }
-
-    function testSwap_leaveSurplusTokenInVault() public {
+    function testSwap_leaveSurplusTokenInOxionStorage() public {
         PoolKey memory key = PoolKey({
             currency0: currency0,
             currency1: currency1,
@@ -1176,7 +1017,7 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
 
     function testSwap_withNative_gas() public {
         PoolKey memory key = PoolKey({
-            currency0: currency0,
+            currency0: Currency.wrap(address(0)),
             currency1: currency1,
             fee: 3000,
             poolManager: poolManager
@@ -1199,7 +1040,7 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
         snapEnd();
     }
 
-    function testSwap_leaveSurplusTokenInVault_gas() public {
+    function testSwap_leaveSurplusTokenInOxionStorage_gas() public {
         PoolKey memory key = PoolKey({
             currency0: currency0,
             currency1: currency1,
@@ -1219,7 +1060,7 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
             IPoolManager.ModifyLiquidityParams({tickLower: -120, tickUpper: 120, liquidityDelta: 1000000000000000000})
         );
 
-        snapStart("PoolManagerTest#swap_leaveSurplusTokenInVault");
+        snapStart("PoolManagerTest#swap_leaveSurplusTokenInOxionStorage");
         router.swap(key, params, testSettings);
         snapEnd();
     }
@@ -1390,36 +1231,6 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
         assertEq(feeGrowthGlobal1X128, 680564733841876926926749214863536422912);
     }
 
-    function testDonateFailsWithIncorrectSelectors() public {
-        PoolKey memory key = PoolKey({
-            currency0: currency0,
-            currency1: currency1,
-            fee: 100,
-            poolManager: poolManager
-        });
-        poolManager.initialize(key, SQRT_RATIO_1_1);
-
-        IPoolManager.ModifyLiquidityParams memory params = IPoolManager.ModifyLiquidityParams(-60, 60, 100);
-        router.modifyPosition(key, params);
-        router.donate(key, 100, 200);
-        router.donate(key, 100, 200);
-    }
-
-    function testDonateSucceedsWithCorrectSelectors() public {
-        PoolKey memory key = PoolKey({
-            currency0: currency0,
-            currency1: currency1,
-            fee: 100,
-            poolManager: poolManager
-        });
-        poolManager.initialize(key, SQRT_RATIO_1_1);
-
-        IPoolManager.ModifyLiquidityParams memory params = IPoolManager.ModifyLiquidityParams(-60, 60, 100);
-        router.modifyPosition(key, params);
-
-        router.donate(key, 100, 200);
-    }
-
     function testDonateSuccessWithEventEmitted() public {
         PoolKey memory key = PoolKey({
             currency0: currency0,
@@ -1457,10 +1268,15 @@ contract PoolManagerTest is Test, Deployers, TokenFixture, GasSnapshot {
         snapEnd();
     }
 
+    // **************        *************** //
+    // **************  take  *************** //
+    // **************        *************** //
+
     function testTake_failsWithInvalidTokensThatDoNotReturnTrueOnTransfer() public {
         NonStandardERC20 invalidToken = new NonStandardERC20(2 ** 255);
         Currency invalidCurrency = Currency.wrap(address(invalidToken));
         bool currency0Invalid = invalidCurrency < currency0;
+        
         PoolKey memory key = PoolKey({
             currency0: currency0Invalid ? invalidCurrency : currency0,
             currency1: currency0Invalid ? currency0 : invalidCurrency,

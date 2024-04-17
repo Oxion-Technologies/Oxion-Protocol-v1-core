@@ -2,9 +2,9 @@
 // Copyright (C) 2024 Oxion Protocol
 pragma solidity ^0.8.24;
 
-import "../libraries/SafeCast.sol";
-import "./TickMath.sol";
-import "./LiquidityMath.sol";
+import {SafeCast} from "../libraries/SafeCast.sol";
+import {TickMath} from "./TickMath.sol";
+import {LiquidityMath} from "./LiquidityMath.sol";
 
 /// @title Tick
 /// @notice Contains functions for managing tick processes and relevant calculations

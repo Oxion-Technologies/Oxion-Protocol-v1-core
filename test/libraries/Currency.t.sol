@@ -4,7 +4,8 @@ pragma solidity ^0.8.24;
 import {Test} from "forge-std/Test.sol";
 import {MockERC20} from "solmate/test/utils/mocks/MockERC20.sol";
 import {Currency, CurrencyLibrary} from "../../src/types/Currency.sol";
-import {TokenRejecter} from "../helpers/TokenRejecter.sol";
+
+contract TokenRejecter {}
 
 contract TestCurrency is Test {
     using CurrencyLibrary for Currency;

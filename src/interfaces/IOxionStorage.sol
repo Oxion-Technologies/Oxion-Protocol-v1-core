@@ -71,7 +71,7 @@ interface IOxionStorage is IOxionToken {
     function settle(Currency token) external payable returns (uint256 paid);
 
     /// @notice Called by the user to pay what is owed. If the payment is more than the debt, the surplus is refunded by minting
-    /// @dev To claim the refund, caller must eventually call vault.burn() -> vault.take() to take the ERC20 token from vault
+    /// @dev To claim the refund, caller must eventually call oxionStorage.burn() -> oxionStorage.take() to take the ERC20 token from vault
     /// @param currency The currency to settle
     /// @param to The address to mint the refund
     /// @return paid The amount paid

@@ -6,7 +6,6 @@ import {Currency} from "../../src/types/Currency.sol";
 import {IPoolManager} from "../../src/interfaces/IPoolManager.sol";
 import {PoolManager} from "../../src/PoolManager.sol";
 import {PoolId, PoolIdLibrary} from "../../src/types/PoolId.sol";
-import {FeeLibrary} from "../../src/libraries/FeeLibrary.sol";
 import {PoolKey} from "../../src/types/PoolKey.sol";
 import {Constants} from "./Constants.sol";
 import {SortTokens} from "./SortTokens.sol";
@@ -14,7 +13,6 @@ import {OxionStorage} from "../../src/OxionStorage.sol";
 import {IOxionStorage} from "../../src/interfaces/IOxionStorage.sol";
 
 contract Deployers {
-    using FeeLibrary for uint24;
     using PoolIdLibrary for PoolKey;
 
     uint160 constant SQRT_RATIO_1_1 = Constants.SQRT_RATIO_1_1;
